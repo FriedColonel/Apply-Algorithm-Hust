@@ -1,78 +1,100 @@
 #include <bits/stdc++.h>
-#define N 5002
-#define M 10002
+#define INF 1000000000
+#define N 5001
+#define M 10001
 
 using namespace std;
 
-struct Edge {
-  int u, v;
-  Edge(int _u, int _v) {
-    this->u = _u;
-    this->v = _v;
-  }
-};
-
 int n, m;
-int c[N], d[M];
-int I, J;
-vector<int> graph[N];
-vector<pair<int,int>> Tgraph[N];
-int parent[N];
+int C[N], D[M];
+vector<int> a[N];
+vector<pair<int,int>> g[N];
+bool visited[N];
 int dist[N];
-int weight[N];
+int previous[N];
 
 void input() {
   cin >> n >> m;
   for (int i = 1; i <= n; i++) {
-    scanf("%d%d", &c[i], &d[i]);
+    scanf("%d %d", &C[i], &D[i]);
   }
-  for (int i = 0; i < m; i++) {
-    int u, v;
-    scanf("%d%d", &u, &v);
-    graph[u].push_back(v);
-    graph[v].push_back(u);
+  for (int i = 1; i <= m; i++) {
+    int x, y;
+    scanf("%d %d", &x, &y);
+    a[x].push_back(y);
+    a[y].push_back(x);
   }
 }
 
-void bfs(int u, int c, int d) {
-  queue<int> q;
-  q.push(u);
-  weight[u] = 0;
+void bfs(int start) {
+  queue<pair<int,int>> q; // node, distance
+  q.push(make_pair(start, 0));
+  visited[start] = true;
   while (!q.empty()) {
-    int u = q.front();
+    int u = q.front().first;
+    int d = q.front().second;
     q.pop();
-    for (int i = 0; i < graph[u].size(); i++) {
-      int v = graph[u][i];
-      weight[v] = weight[u] + 1;
-      if (weight[v] > d) return;
-      Tgraph[u].push_back(make_pair(v, c));
-      q.push(v);
-    }
-  }
-}
-
-void dijikstra() {
-  priority_queue<pair<int,int>, vector<pair<int,int>>, greater<pair<int,int>>> pq;
-  pq.push(make_pair(0, I));
-  dist[I] = 0;
-  while (!pq.empty()) {
-    int u = pq.top().second;
-    pq.pop();
-    for (int i = 0; i < Tgraph[u].size(); i++) {
-      int v = Tgraph[u][i].first;
-      int w = Tgraph[u][i].second;
-      if (dist[v] > dist[u] + w) {
-        dist[v] = dist[u] + w;
-        pq.push(make_pair(dist[v], v));
+    for (int i = 0; i < a[u].size(); i++) {
+      int v = a[u][i];
+      if (visited[v] == false && (d + 1) <= D[start]) {
+        q.push(make_pair(v, d+1));
+        visited[v] = true;
+        g[start].push_back(make_pair(v, C[start]));
       }
     }
   }
 }
 
-void solve() {
-
+void printGraph() {
+  for (int i = 1; i <= n; i++) {
+    cout << i << ": ";
+    for (int j = 0; j < g[i].size(); j++) {
+      cout << "(" << g[i][j].first << ", " << g[i][j].second << ") ";
+    }
+    cout << endl;
+  }
 }
 
-int main(int argc, char const *argv[]){
+void buildTree() {
+  for (int i = 1; i <= n; i++) {
+    memset(visited, false, sizeof(visited));
+    bfs(i);
+  }
+  // printGraph();
+}
+
+void solve() {
+  buildTree();
+
+  for (int i = 1; i <= n; i++) {
+    dist[i] = INF;
+    previous[i] = -1;
+  }
+
+  priority_queue<pair<int,int>, vector<pair<int,int>>, greater<pair<int,int>>> pq;
+
+  pq.push(make_pair(0, 1)); // distance, node
+  dist[1] = 0;
+  while (!pq.empty()) {
+    int u = pq.top().second;
+    int d = pq.top().first;
+    pq.pop();
+    for (int i = 0; i < g[u].size(); i++) {
+      int v = g[u][i].first;
+      int w = g[u][i].second;
+      if (dist[v] > dist[u] + w) {
+        dist[v] = dist[u] + w;
+        previous[v] = u;
+        pq.push(make_pair(dist[v], v));
+      }
+    }
+  }
+
+  cout << dist[n] << endl;
+}
+
+int main(int argc, char const *argv[]) {
+  input();
+  solve();
   return 0;
 }

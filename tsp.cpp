@@ -1,18 +1,16 @@
 #include <bits/stdc++.h>
-#define N 50
-#define M 100000000
+#define N 21
 
 using namespace std;
 
-int a[N];
 int n;
 int c[N][N];
-int F[N][M];
+int F[N][(1 << (N+1))];
 
 void input() {
   cin >> n;
-  for (int i = 0; i < n; i++)
-    for (int j = 0; j < n; j++)
+  for (int i = 1; i <= n; i++)
+    for (int j = 1; j <= n; j++)
       scanf("%d", &c[i][j]);
 }
 
@@ -30,11 +28,11 @@ int TSP(int i, unsigned int s) {
     return F[i][s];
   }
   if (F[i][s] < 0) {
-    F[i][s] = 1e9;
-    for (int j = 0; j < n-1; j++) {
-      if (contains(j, s)) {
+    F[i][s] = 1000000000;
+    for (int j = 1; j <= n; j++) {
+      if (contains(j, s) && j != i) {
         unsigned int sj = remove(j, s);
-        int tj = TSP(j,s) + c[i][j];
+        int tj = TSP(j,sj) + c[i][j];
         if (F[i][s] > tj) {
           F[i][s] = tj;
         }
@@ -46,13 +44,13 @@ int TSP(int i, unsigned int s) {
 
 int main(int argc, char const *argv[]) {
   input();
-  for (int i = 0; i < n; i++) {
-    for (int j = 0; j < M; j++) {
+
+  for (int i = 1; i <= n; i++)
+    for (int j = 1; j <= (1 << n - 1); j++)
       F[i][j] = -1;
-    }
-  }
+
   unsigned int s = (1 << n) - 1;
-  int ans = TSP(0, s);
+  int ans = TSP(1, s);
   cout << ans;
   return 0;
 }
